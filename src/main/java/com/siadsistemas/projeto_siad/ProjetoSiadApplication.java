@@ -9,6 +9,6 @@ public class ProjetoSiadApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ProjetoSiadApplication.class, args);
-		System.out.println("Testando");
+		System.out.println("Executando...");
 	}
 }
