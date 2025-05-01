@@ -2,6 +2,7 @@ package com.siadsistemas.projeto_siad.service;
 
 import com.siadsistemas.projeto_siad.dto.LogradouroDTO;
 import com.siadsistemas.projeto_siad.model.Logradouro;
+import com.siadsistemas.projeto_siad.model.TipoLogradouro;
 import com.siadsistemas.projeto_siad.repository.LogradouroRepository;
 import com.siadsistemas.projeto_siad.repository.TipoLogradouroRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -49,6 +50,33 @@ public class LogradouroService {
         logradouro.setCodigo(novoCodigo);
 
         return logradouroRepository.save(logradouro);
+    }
+
+    @Transactional
+    public Logradouro buscarOuCriar(String nome, Integer tipoLogradouro) {
+        return logradouroRepository.findByNomeAndAtivoTrue(nome)
+                .orElseGet(() -> {
+                    if (tipoLogradouro == null) {
+                        throw new IllegalArgumentException("Tipo de logradouro é obrigatório para criar um novo.");
+                    }
+
+                    Logradouro novo = new Logradouro();
+                    novo.setNome(nome);
+                    novo.setNome_anterior(nome);
+                    novo.setAtivo(true);
+                    novo.setCreated_at(LocalDateTime.now());
+                    novo.setUpdated_at(LocalDateTime.now());
+
+                    novo.setTipo_logradouro(
+                            tipoLogradouroRepository.findByCodigo(tipoLogradouro)
+                                    .orElseThrow(() -> new EntityNotFoundException(
+                                            "Tipo de logradouro não encontrado com código: " + tipoLogradouro))
+                    );
+
+                    novo.setCodigo(logradouroRepository.findMaxCodigo() + 1);
+
+                    return logradouroRepository.save(novo);
+                });
     }
 
     private Logradouro findById(UUID id) {

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,4 +16,6 @@ public interface CidadeRepository extends JpaRepository<Cidade, UUID> {
 
     @Query("SELECT COALESCE(MAX(e.codigo), 0) FROM Cidade e")
     Integer findMaxCodigo();
+
+    List<Cidade> findAllByAtivoTrue();
 }

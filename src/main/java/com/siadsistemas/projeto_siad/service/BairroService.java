@@ -30,8 +30,4 @@ public class BairroService {
                     return bairroRepository.save(novo);
                 });
     }
-
-    public List<Bairro> listarTodos() {
-        return bairroRepository.findAllByAtivoTrue();
-    }
 }

@@ -16,17 +16,6 @@ public class BairroController {
 
     private final BairroService bairroService;
 
-    @GetMapping
-    public ResponseEntity<List<Bairro>> listarTodos() {
-        List<Bairro> bairros = bairroService.listarTodos();
-
-        if (bairros.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(bairros);
-    }
-
     @PostMapping
     public ResponseEntity<Bairro> criarOuBuscar(@RequestBody BairroDTO dto) {
         Bairro bairro = bairroService.buscarOuCriar(dto.nome());

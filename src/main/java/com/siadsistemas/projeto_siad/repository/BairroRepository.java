@@ -19,4 +19,6 @@ public interface BairroRepository extends JpaRepository<Bairro, UUID> {
     List<Bairro> findAllByAtivoTrue();
 
     Optional<Bairro> findByIdAndAtivoTrue(UUID id);
+
+    Optional<Bairro> findByNomeAndAtivoTrue(String nome);
 }
