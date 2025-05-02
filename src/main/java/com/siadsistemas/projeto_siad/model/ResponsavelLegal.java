@@ -23,7 +23,6 @@ public class ResponsavelLegal {
     @Column(nullable = false, unique = true)
     private Integer codigo;
 
-    @Getter
     @Enumerated(EnumType.STRING)
     private TipoPessoaEnum tipoPessoa;
 
@@ -31,7 +30,6 @@ public class ResponsavelLegal {
     private String telefoneFixo;
     private String telefoneCelular;
     private String email;
-
     private String numeroDocumento;
 
     @ManyToOne
