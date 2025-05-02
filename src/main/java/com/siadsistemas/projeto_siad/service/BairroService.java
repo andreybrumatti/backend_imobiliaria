@@ -27,7 +27,6 @@ public class BairroService {
             existenteEditado.setNome(nome);
             existenteEditado.setCidade(cidadeRepository.findByCodigo(cidade_codigo)
                     .orElseThrow(() -> new EntityNotFoundException("Cidade não encontrada com código: " + cidade_codigo)));
-            existenteEditado.setAtivo(true);
             existenteEditado.setUpdated_at(LocalDateTime.now());
             return bairroRepository.save(existenteEditado);
         }
