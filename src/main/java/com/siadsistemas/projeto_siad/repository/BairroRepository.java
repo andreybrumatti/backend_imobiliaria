@@ -11,14 +11,10 @@ import java.util.UUID;
 
 @Repository
 public interface BairroRepository extends JpaRepository<Bairro, UUID> {
-    Optional<Bairro> findByNomeIgnoreCase(String nome);
+    Optional<Bairro> findByNomeAndAtivoTrueIgnoreCase(String nome);
 
     @Query("SELECT COALESCE(MAX(e.codigo), 0) FROM Bairro e")
     Integer findMaxCodigo();
 
     List<Bairro> findAllByAtivoTrue();
-
-    Optional<Bairro> findByIdAndAtivoTrue(UUID id);
-
-    Optional<Bairro> findByNomeAndAtivoTrue(String nome);
 }

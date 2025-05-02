@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/bairros")
 @AllArgsConstructor
@@ -18,7 +16,7 @@ public class BairroController {
 
     @PostMapping
     public ResponseEntity<Bairro> criarOuBuscar(@RequestBody BairroDTO dto) {
-        Bairro bairro = bairroService.buscarOuCriar(dto.nome());
+        Bairro bairro = bairroService.buscarOuCriar(dto.nome(), dto.cidade_id());
         return ResponseEntity.ok(bairro);
     }
 }

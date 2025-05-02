@@ -5,7 +5,6 @@ import com.siadsistemas.projeto_siad.model.Bairro;
 import com.siadsistemas.projeto_siad.model.Endereco;
 import com.siadsistemas.projeto_siad.model.Logradouro;
 import com.siadsistemas.projeto_siad.repository.EnderecoRepository;
-import com.siadsistemas.projeto_siad.repository.LogradouroRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,7 +32,7 @@ public class EnderecoService {
 
         Logradouro logradouro = logradouroService.buscarOuCriar(dto.logradouro().getNome(), dto.logradouro().getTipo_logradouro().getCodigo());
 
-        Bairro bairro = bairroService.buscarOuCriar(dto.endereco().getBairro().getNome());
+        Bairro bairro = bairroService.buscarOuCriar(dto.endereco().getBairro().getNome(), dto.endereco().getBairro().getCidade().getCodigo());
 
         Endereco endereco = new Endereco();
         endereco.setCodigo(enderecoRepository.findMaxCodigo() + 1);
@@ -56,7 +55,7 @@ public class EnderecoService {
 
         Logradouro logradouro = logradouroService.buscarOuCriar(dto.logradouro().getNome(), dto.logradouro().getTipo_logradouro().getCodigo());
 
-        Bairro bairro = bairroService.buscarOuCriar(dto.endereco().getBairro().getNome());
+        Bairro bairro = bairroService.buscarOuCriar(dto.endereco().getBairro().getNome(), dto.endereco().getBairro().getCidade().getCodigo());
 
         validarCamposParaAtualizacao(dto);
 
@@ -81,12 +80,6 @@ public class EnderecoService {
     }
 
     private void validarCamposParaCriacao(EnderecoDTO dto) {
-        if (dto.logradouro() == null || dto.logradouro().getId()== null) {
-            throw new IllegalArgumentException("Código do logradouro é obrigatório.");
-        }
-        if (dto.endereco() == null || dto.endereco().getBairro() == null || dto.endereco().getBairro().getId() == null) {
-            throw new IllegalArgumentException("Código do bairro é obrigatório.");
-        }
         if (dto.endereco().getNumero() == null || dto.endereco().getCep() == null) {
             throw new IllegalArgumentException("Número e CEP são obrigatórios.");
         }

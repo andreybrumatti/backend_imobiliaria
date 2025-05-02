@@ -16,7 +16,7 @@ public interface LogradouroRepository extends JpaRepository<Logradouro, UUID> {
 
     Optional<Logradouro> findByIdAndAtivoTrue(UUID id);
 
-    Optional<Logradouro> findByNomeAndAtivoTrue(String nome);
+    Optional<Logradouro> findByNomeAndAtivoTrueIgnoreCase(String nome);
 
     @Query("SELECT COALESCE(MAX(e.codigo), 0) FROM Logradouro e")
     Integer findMaxCodigo();

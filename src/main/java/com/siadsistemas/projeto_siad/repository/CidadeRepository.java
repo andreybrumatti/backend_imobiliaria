@@ -14,6 +14,8 @@ public interface CidadeRepository extends JpaRepository<Cidade, UUID> {
 
     Optional<Cidade> findByNomeIgnoreCase(String nome);
 
+    Optional<Cidade> findByCodigo(Integer codigo);
+
     @Query("SELECT COALESCE(MAX(e.codigo), 0) FROM Cidade e")
     Integer findMaxCodigo();
 

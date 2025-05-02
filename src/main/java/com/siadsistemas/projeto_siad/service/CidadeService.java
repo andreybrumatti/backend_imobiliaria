@@ -1,6 +1,5 @@
 package com.siadsistemas.projeto_siad.service;
 
-import com.siadsistemas.projeto_siad.model.Bairro;
 import com.siadsistemas.projeto_siad.model.Cidade;
 import com.siadsistemas.projeto_siad.repository.CidadeRepository;
 import lombok.AllArgsConstructor;

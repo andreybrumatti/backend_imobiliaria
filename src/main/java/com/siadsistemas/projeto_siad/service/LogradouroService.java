@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -30,6 +31,12 @@ public class LogradouroService {
 
         if (dto.nome() == null || dto.nome().isEmpty() || dto.tipo_logradouro() == null) {
             throw new IllegalArgumentException("Dados inválidos: Nome e Tipo do logradouro são obrigatórios.");
+        }
+
+        Optional<Logradouro> existente = logradouroRepository.findByNomeAndAtivoTrueIgnoreCase(dto.nome());
+
+        if(existente.isPresent()) {
+            throw new IllegalArgumentException("Logradouro já cadastrado com o nome: " + dto.nome());
         }
 
         Logradouro logradouro = new Logradouro();
@@ -54,29 +61,37 @@ public class LogradouroService {
 
     @Transactional
     public Logradouro buscarOuCriar(String nome, Integer tipoLogradouro) {
-        return logradouroRepository.findByNomeAndAtivoTrue(nome)
-                .orElseGet(() -> {
-                    if (tipoLogradouro == null) {
-                        throw new IllegalArgumentException("Tipo de logradouro é obrigatório para criar um novo.");
-                    }
 
-                    Logradouro novo = new Logradouro();
-                    novo.setNome(nome);
-                    novo.setNome_anterior(nome);
-                    novo.setAtivo(true);
-                    novo.setCreated_at(LocalDateTime.now());
-                    novo.setUpdated_at(LocalDateTime.now());
+        Optional<Logradouro> log  = logradouroRepository.findByNomeAndAtivoTrueIgnoreCase(nome);
 
-                    novo.setTipo_logradouro(
-                            tipoLogradouroRepository.findByCodigo(tipoLogradouro)
-                                    .orElseThrow(() -> new EntityNotFoundException(
-                                            "Tipo de logradouro não encontrado com código: " + tipoLogradouro))
-                    );
+        if(log.isPresent()){
+            Logradouro logEditado = log.get();
 
-                    novo.setCodigo(logradouroRepository.findMaxCodigo() + 1);
+            TipoLogradouro newTipo = tipoLogradouroRepository.findByCodigo(tipoLogradouro)
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Tipo de logradouro não encontrado com código: " + tipoLogradouro));
 
-                    return logradouroRepository.save(novo);
-                });
+            logEditado.setTipo_logradouro(newTipo);
+
+            return logradouroRepository.save(logEditado);
+        }
+
+        Logradouro novoLogradouro = new Logradouro();
+        novoLogradouro.setNome(nome);
+        novoLogradouro.setNome_anterior(nome);
+        novoLogradouro.setTipo_logradouro(
+                tipoLogradouroRepository.findByCodigo(tipoLogradouro)
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "Tipo de logradouro não encontrado com código: " + tipoLogradouro))
+        );
+
+        novoLogradouro.setAtivo(true);
+        novoLogradouro.setCreated_at(LocalDateTime.now());
+        novoLogradouro.setUpdated_at(LocalDateTime.now());
+        Integer novoCodigo = logradouroRepository.findMaxCodigo() + 1;
+        novoLogradouro.setCodigo(novoCodigo);
+
+        return logradouroRepository.save(novoLogradouro);
     }
 
     private Logradouro findById(UUID id) {
