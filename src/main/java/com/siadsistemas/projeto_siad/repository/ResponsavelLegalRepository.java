@@ -21,6 +21,8 @@ public interface ResponsavelLegalRepository extends JpaRepository<ResponsavelLeg
 
     boolean existsByNumeroDocumentoAndTipoPessoa(String numeroDocumento, TipoPessoaEnum tipoPessoa);
 
+    boolean existsByNomeIgnoreCaseAndAtivoTrue(String nome);
+
     @Query("SELECT COALESCE(MAX(r.codigo), 0) FROM ResponsavelLegal r")
     Integer findMaxCodigo();
 }

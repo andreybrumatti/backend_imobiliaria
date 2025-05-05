@@ -28,6 +28,10 @@ public class BoletimImobiliario {
     private ResponsavelLegal responsavelLegal;
 
     @ManyToOne
+    @JoinColumn(name = "endereco_id")
+    private Endereco endereco;
+
+    @ManyToOne
     @JoinColumn(name = "endereco_fisico_id")
     private Endereco enderecoFisico;
 

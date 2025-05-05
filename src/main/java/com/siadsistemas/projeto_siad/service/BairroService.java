@@ -19,7 +19,7 @@ public class BairroService {
 
     public Bairro buscarOuCriar(String nome, Integer cidade_codigo) {
 
-        Optional <Bairro> existente = bairroRepository.findByNomeAndAtivoTrueIgnoreCase(nome);
+        Optional<Bairro> existente = bairroRepository.findByNomeAndAtivoTrueIgnoreCase(nome);
 
         if(existente.isPresent()) {
             Bairro existenteEditado = existente.get();

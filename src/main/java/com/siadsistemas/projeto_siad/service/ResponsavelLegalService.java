@@ -1,7 +1,9 @@
 package com.siadsistemas.projeto_siad.service;
 
 import com.siadsistemas.projeto_siad.dto.ResponsavelLegalDTO;
+import com.siadsistemas.projeto_siad.model.Bairro;
 import com.siadsistemas.projeto_siad.model.Endereco;
+import com.siadsistemas.projeto_siad.model.Logradouro;
 import com.siadsistemas.projeto_siad.model.ResponsavelLegal;
 import com.siadsistemas.projeto_siad.repository.EnderecoRepository;
 import com.siadsistemas.projeto_siad.repository.ResponsavelLegalRepository;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,6 +23,8 @@ public class ResponsavelLegalService {
 
     private final ResponsavelLegalRepository responsavelLegalRepository;
     private final EnderecoRepository enderecoRepository;
+    private final LogradouroService logradouroService;
+    private final BairroService bairroService;
 
     public List<ResponsavelLegal> findAll() {
         return responsavelLegalRepository.findAllByAtivoTrue();
@@ -28,14 +33,7 @@ public class ResponsavelLegalService {
     @Transactional
     public ResponsavelLegal create(ResponsavelLegalDTO dto) {
         validarCampos(dto);
-
-        if (responsavelLegalRepository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("E-mail já cadastrado.");
-        }
-
-        if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoa(dto.numeroDocumento(), dto.tipoPessoa())) {
-            throw new IllegalArgumentException("Documento já cadastrado para esse tipo de pessoa.");
-        }
+        validarUnicidade(dto);
 
         ResponsavelLegal responsavel = new ResponsavelLegal();
         responsavel.setCodigo(responsavelLegalRepository.findMaxCodigo() + 1);
@@ -46,10 +44,9 @@ public class ResponsavelLegalService {
         responsavel.setEmail(dto.email());
         responsavel.setNumeroDocumento(dto.numeroDocumento());
 
-        Endereco endereco = enderecoRepository.findByIdAndAtivoTrue(dto.endereco().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado com id: " + dto.endereco().getId()));
-
+        Endereco endereco = buscarOuCriarEnderecoCompleto(dto.endereco());
         responsavel.setEndereco(endereco);
+
         responsavel.setAtivo(true);
         responsavel.setCreated_at(LocalDateTime.now());
         responsavel.setUpdated_at(LocalDateTime.now());
@@ -63,18 +60,7 @@ public class ResponsavelLegalService {
                 .orElseThrow(() -> new EntityNotFoundException("Responsável legal não encontrado com id: " + id));
 
         validarCampos(dto);
-
-        if (!existente.getEmail().equalsIgnoreCase(dto.email()) &&
-                responsavelLegalRepository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("E-mail já cadastrado.");
-        }
-
-        if (!existente.getNumeroDocumento().equalsIgnoreCase(dto.numeroDocumento()) ||
-                existente.getTipoPessoa() != dto.tipoPessoa()) {
-            if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoa(dto.numeroDocumento(), dto.tipoPessoa())) {
-                throw new IllegalArgumentException("Documento já cadastrado para esse tipo de pessoa.");
-            }
-        }
+        validarUnicidade(dto);
 
         existente.setTipoPessoa(dto.tipoPessoa());
         existente.setNome(dto.nome());
@@ -83,8 +69,7 @@ public class ResponsavelLegalService {
         existente.setEmail(dto.email());
         existente.setNumeroDocumento(dto.numeroDocumento());
 
-        Endereco endereco = enderecoRepository.findByIdAndAtivoTrue(dto.endereco().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado com id: " + dto.endereco().getId()));
+        Endereco endereco = buscarOuCriarEnderecoCompleto(dto.endereco());
         existente.setEndereco(endereco);
 
         existente.setUpdated_at(LocalDateTime.now());
@@ -115,8 +100,55 @@ public class ResponsavelLegalService {
         if (dto.email() == null || dto.email().isBlank()) {
             throw new IllegalArgumentException("E-mail é obrigatório.");
         }
-        if (dto.endereco().getId() == null) {
-            throw new IllegalArgumentException("Endereço é obrigatório.");
+    }
+
+    public void validarUnicidade(ResponsavelLegalDTO dto) {
+        if (responsavelLegalRepository.existsByEmail(dto.email())) {
+            throw new IllegalArgumentException("E-mail já cadastrado.");
+        }
+
+        if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoa(dto.numeroDocumento(), dto.tipoPessoa())) {
+            throw new IllegalArgumentException("Documento já cadastrado para esse tipo de pessoa.");
         }
     }
+
+    public Endereco buscarOuCriarEnderecoCompleto(Endereco enderecoDTO) {
+        Optional<Endereco> endereco = enderecoRepository.findByCampos(
+                enderecoDTO.getNumero(),
+                enderecoDTO.getComplemento(),
+                enderecoDTO.getCep(),
+                enderecoDTO.getLogradouro().getNome(),
+                enderecoDTO.getLogradouro().getTipo_logradouro().getCodigo(),
+                enderecoDTO.getBairro().getNome(),
+                enderecoDTO.getBairro().getCidade().getCodigo()
+        );
+
+        if (endereco.isPresent()) {
+            return endereco.get();
+        }
+
+        Logradouro logradouro = logradouroService.buscarOuCriar(
+                enderecoDTO.getLogradouro().getNome(),
+                enderecoDTO.getLogradouro().getTipo_logradouro().getCodigo()
+        );
+
+        Bairro bairro = bairroService.buscarOuCriar(
+                enderecoDTO.getBairro().getNome(),
+                enderecoDTO.getBairro().getCidade().getCodigo()
+        );
+
+        Endereco novoEndereco = new Endereco();
+        novoEndereco.setLogradouro(logradouro);
+        novoEndereco.setBairro(bairro);
+        novoEndereco.setNumero(enderecoDTO.getNumero());
+        novoEndereco.setComplemento(enderecoDTO.getComplemento());
+        novoEndereco.setCep(enderecoDTO.getCep());
+        novoEndereco.setAtivo(true);
+        novoEndereco.setCodigo(enderecoRepository.findMaxCodigo() + 1);
+        novoEndereco.setCreated_at(LocalDateTime.now());
+        novoEndereco.setUpdated_at(LocalDateTime.now());
+
+        return enderecoRepository.save(novoEndereco);
+    }
+
 }
