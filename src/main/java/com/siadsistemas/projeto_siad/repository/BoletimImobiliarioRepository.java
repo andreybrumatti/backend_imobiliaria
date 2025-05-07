@@ -16,7 +16,7 @@ public interface BoletimImobiliarioRepository extends JpaRepository<BoletimImobi
 
     Optional<BoletimImobiliario> findByIdAndAtivoTrue(UUID id);
 
-    List<BoletimImobiliario> findAllByAtivoTrue();
+    List<BoletimImobiliario> findAllByAtivoTrueOrderByCodigoAsc();
 
     @Query("SELECT COALESCE(MAX(e.codigo), 0) FROM BoletimImobiliario e")
     Integer findMaxCodigo();

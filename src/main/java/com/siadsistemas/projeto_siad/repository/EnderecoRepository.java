@@ -18,7 +18,7 @@ public interface EnderecoRepository extends JpaRepository<Endereco, UUID> {
 
     Optional<Endereco> findByIdAndAtivoTrue(UUID id);
 
-    List<Endereco> findAllByAtivoTrue();
+    List<Endereco> findAllByAtivoTrueOrderByCodigoAsc();
 
     @Query("""
     SELECT e FROM Endereco e

@@ -12,7 +12,7 @@ import java.util.UUID;
 @Repository
 public interface LogradouroRepository extends JpaRepository<Logradouro, UUID> {
 
-    List<Logradouro> findAllByAtivoTrue();
+    List<Logradouro> findAllByAtivoTrueOrderByCodigoAsc();
 
     Optional<Logradouro> findByIdAndAtivoTrue(UUID id);
 

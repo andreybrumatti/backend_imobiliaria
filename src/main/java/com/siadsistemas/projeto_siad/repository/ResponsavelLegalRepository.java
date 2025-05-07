@@ -13,7 +13,7 @@ import java.util.UUID;
 @Repository
 public interface ResponsavelLegalRepository extends JpaRepository<ResponsavelLegal, UUID> {
 
-    List<ResponsavelLegal> findAllByAtivoTrue();
+    List<ResponsavelLegal> findAllByAtivoTrueOrderByCodigoAsc();
 
     Optional<ResponsavelLegal> findByIdAndAtivoTrue(UUID id);
 
@@ -22,6 +22,9 @@ public interface ResponsavelLegalRepository extends JpaRepository<ResponsavelLeg
     boolean existsByNumeroDocumentoAndTipoPessoa(String numeroDocumento, TipoPessoaEnum tipoPessoa);
 
     boolean existsByNomeIgnoreCaseAndAtivoTrue(String nome);
+    boolean existsByNomeIgnoreCaseAndAtivoTrueAndCodigoNot(String nome, Integer codigo);
+    boolean existsByEmailAndCodigoNot(String email, Integer codigo);
+    boolean existsByNumeroDocumentoAndTipoPessoaAndCodigoNot(String numeroDocumento, TipoPessoaEnum tipoPessoa, Integer codigo);
 
     @Query("SELECT COALESCE(MAX(r.codigo), 0) FROM ResponsavelLegal r")
     Integer findMaxCodigo();

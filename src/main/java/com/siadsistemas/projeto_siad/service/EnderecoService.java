@@ -1,6 +1,8 @@
 package com.siadsistemas.projeto_siad.service;
 
 import com.siadsistemas.projeto_siad.dto.EnderecoDTO;
+import com.siadsistemas.projeto_siad.exception.domain.endereco.EnderecoException;
+import com.siadsistemas.projeto_siad.exception.domain.endereco.EnderecoNotFoundException;
 import com.siadsistemas.projeto_siad.model.Bairro;
 import com.siadsistemas.projeto_siad.model.Endereco;
 import com.siadsistemas.projeto_siad.model.Logradouro;
@@ -23,7 +25,7 @@ public class EnderecoService {
     private final BairroService bairroService;
 
     public List<Endereco> findAll() {
-        return enderecoRepository.findAllByAtivoTrue();
+        return enderecoRepository.findAllByAtivoTrueOrderByCodigoAsc();
     }
 
     @Transactional
@@ -51,7 +53,7 @@ public class EnderecoService {
     @Transactional
     public Endereco update(EnderecoDTO dto) {
         Endereco existente = enderecoRepository.findByIdAndAtivoTrue(dto.endereco().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado com ID: " + dto.endereco().getId()));
+                .orElseThrow(() -> new EnderecoNotFoundException("Endereço não encontrado com ID: " + dto.endereco().getId()));
 
         Logradouro logradouro = logradouroService.buscarOuCriar(dto.logradouro().getNome(), dto.logradouro().getTipo_logradouro().getCodigo());
 
@@ -72,7 +74,7 @@ public class EnderecoService {
     @Transactional
     public void inativarPorId(UUID id) {
         Endereco existente = enderecoRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado com ID: " + id));
+                .orElseThrow(() -> new EnderecoNotFoundException("Endereço não encontrado com ID: " + id));
 
         existente.setAtivo(false);
         existente.setUpdated_at(LocalDateTime.now());
@@ -81,13 +83,13 @@ public class EnderecoService {
 
     private void validarCamposParaCriacao(EnderecoDTO dto) {
         if (dto.endereco().getNumero() == null || dto.endereco().getCep() == null) {
-            throw new IllegalArgumentException("Número e CEP são obrigatórios.");
+            throw new EnderecoException("Número e CEP são obrigatórios.");
         }
     }
 
     private void validarCamposParaAtualizacao(EnderecoDTO dto) {
         if (dto.endereco() == null || dto.endereco().getId() == null) {
-            throw new IllegalArgumentException("Código do endereço é obrigatório para atualização.");
+            throw new EnderecoException("Código do endereço é obrigatório para atualização.");
         }
         validarCamposParaCriacao(dto);
     }

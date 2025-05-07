@@ -2,9 +2,10 @@ package com.siadsistemas.projeto_siad.service;
 
 import com.siadsistemas.projeto_siad.dto.BoletimImobiliarioDTO;
 import com.siadsistemas.projeto_siad.dto.ResponsavelLegalDTO;
+import com.siadsistemas.projeto_siad.exception.domain.boletimImobiliario.BoletimImobiliarioException;
+import com.siadsistemas.projeto_siad.exception.domain.boletimImobiliario.BoletimImobiliarioNotFoundException;
 import com.siadsistemas.projeto_siad.model.*;
 import com.siadsistemas.projeto_siad.repository.BoletimImobiliarioRepository;
-import com.siadsistemas.projeto_siad.repository.EnderecoRepository;
 import com.siadsistemas.projeto_siad.repository.ResponsavelLegalRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,27 +25,29 @@ public class BoletimImobiliarioService {
     private final ResponsavelLegalService  responsavelLegalService;
 
     public List<BoletimImobiliario> findAll() {
-        return boletimRepository.findAllByAtivoTrue();
+        return boletimRepository.findAllByAtivoTrueOrderByCodigoAsc();
     }
 
     @Transactional
     public BoletimImobiliario create(BoletimImobiliarioDTO dto) {
         if (boletimRepository.existsByMatricula(dto.matricula())) {
-            throw new IllegalArgumentException("Já existe um boletim com esta matrícula.");
+            throw new BoletimImobiliarioException("Já existe um boletim com esta matrícula.");
         }
 
         validarCampos(dto);
-        validarUnicidade(dto.responsavelLegal());
+        validarUnicidade(dto.responsavelLegal(), null);
 
-        Endereco endereco = responsavelLegalService.buscarOuCriarEnderecoCompleto(dto.endereco());
         Endereco enderecoFisico = responsavelLegalService.buscarOuCriarEnderecoCompleto(dto.enderecoFisico());
         Endereco enderecoCorrespondencia = responsavelLegalService.buscarOuCriarEnderecoCompleto(dto.enderecoCorrespondencia());
 
         BoletimImobiliario bci = new BoletimImobiliario();
+
+        ResponsavelLegal responsavel = criarResponsavelLegal(dto.responsavelLegal());
+        bci.setResponsavelLegal(responsavel);
+
         bci.setCodigo(boletimRepository.findMaxCodigo() + 1);
         bci.setMatricula(dto.matricula());
 
-        bci.setEndereco(endereco);
         bci.setEnderecoFisico(enderecoFisico);
         bci.setEnderecoCorrespondencia(enderecoCorrespondencia);
 
@@ -59,22 +61,28 @@ public class BoletimImobiliarioService {
     @Transactional
     public BoletimImobiliario update(UUID id, BoletimImobiliarioDTO dto) {
         BoletimImobiliario existente = boletimRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Boletim não encontrado com id: " + id));
-
-        if (!existente.getMatricula().equalsIgnoreCase(dto.matricula()) && //se a matrícula foi alterada
-                boletimRepository.existsByMatricula(dto.matricula())) { //e for igual a alguma matrícula existente
-            throw new IllegalArgumentException("Já existe um boletim com esta matrícula.");
-        }
+                .orElseThrow(() -> new BoletimImobiliarioNotFoundException("Boletim não encontrado com id: " + id));
 
         validarCampos(dto);
+        validarUnicidade(dto.responsavelLegal(), existente.getResponsavelLegal().getCodigo());
 
         Endereco enderecoFisico = responsavelLegalService.buscarOuCriarEnderecoCompleto(dto.enderecoFisico());
         Endereco enderecoCorrespondencia = responsavelLegalService.buscarOuCriarEnderecoCompleto(dto.enderecoCorrespondencia());
 
         existente.setMatricula(dto.matricula());
 
-        ResponsavelLegal responsavel = criarResponsavelLegal(dto.responsavelLegal());
-        existente.setResponsavelLegal(responsavel);
+        // Atualiza os dados do responsável já existente
+        ResponsavelLegal responsavel = existente.getResponsavelLegal();
+        responsavel.setTipoPessoa(dto.responsavelLegal().tipoPessoa());
+        responsavel.setNome(dto.responsavelLegal().nome());
+        responsavel.setTelefoneFixo(dto.responsavelLegal().telefoneFixo());
+        responsavel.setTelefoneCelular(dto.responsavelLegal().telefoneCelular());
+        responsavel.setEmail(dto.responsavelLegal().email());
+        responsavel.setNumeroDocumento(dto.responsavelLegal().numeroDocumento());
+
+        Endereco enderecoResponsavel = responsavelLegalService.buscarOuCriarEnderecoCompleto(dto.responsavelLegal().endereco());
+        responsavel.setEndereco(enderecoResponsavel);
+        responsavel.setUpdated_at(LocalDateTime.now());
 
         existente.setEnderecoFisico(enderecoFisico);
         existente.setEnderecoCorrespondencia(enderecoCorrespondencia);
@@ -86,7 +94,7 @@ public class BoletimImobiliarioService {
     @Transactional
     public void inativarPorId(UUID id) {
         BoletimImobiliario existente = boletimRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Boletim não encontrado com id: " + id));
+                .orElseThrow(() -> new BoletimImobiliarioNotFoundException("Boletim não encontrado com id: " + id));
 
         existente.setAtivo(false);
         existente.setUpdated_at(LocalDateTime.now());
@@ -96,38 +104,49 @@ public class BoletimImobiliarioService {
 
     private void validarCampos(BoletimImobiliarioDTO dto) {
         if (dto.matricula() == null || dto.matricula().isBlank()) {
-            throw new IllegalArgumentException("Matrícula é obrigatória.");
+            throw new BoletimImobiliarioException("Matrícula é obrigatória.");
         }
         if (dto.responsavelLegal() == null) {
-            throw new IllegalArgumentException("Responsável legal é obrigatório.");
+            throw new BoletimImobiliarioException("Responsável legal é obrigatório.");
         }
         if (dto.enderecoFisico() == null) {
-            throw new IllegalArgumentException("Endereço físico é obrigatório.");
+            throw new BoletimImobiliarioException("Endereço físico é obrigatório.");
         }
         if (dto.enderecoCorrespondencia() == null) {
-            throw new IllegalArgumentException("Endereço de correspondência é obrigatório.");
+            throw new BoletimImobiliarioException("Endereço de correspondência é obrigatório.");
         }
     }
 
-    public void validarUnicidade(ResponsavelLegalDTO dto) {
+    public void validarUnicidade(ResponsavelLegalDTO dto, Integer codigoIgnorar) {
+        if (codigoIgnorar == null) {
+            if (responsavelLegalRepository.existsByEmail(dto.email())) {
+                throw new BoletimImobiliarioException("E-mail já cadastrado.");
+            }
 
-        if(responsavelLegalRepository.existsByNomeIgnoreCaseAndAtivoTrue(dto.nome())){
-            throw new IllegalArgumentException("Nome de Responsável já cadastrado.");
-        }
+            if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoa(dto.numeroDocumento(), dto.tipoPessoa())) {
+                throw new BoletimImobiliarioException("Documento já cadastrado para esse tipo de pessoa.");
+            }
 
-        if (responsavelLegalRepository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("E-mail já cadastrado.");
-        }
+            if (responsavelLegalRepository.existsByNomeIgnoreCaseAndAtivoTrue(dto.nome())) {
+                throw new BoletimImobiliarioException("Nome de Responsável já cadastrado.");
+            }
+        } else {
+            if (responsavelLegalRepository.existsByEmailAndCodigoNot(dto.email(), codigoIgnorar)) {
+                throw new BoletimImobiliarioException("E-mail já cadastrado.");
+            }
 
-        if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoa(dto.numeroDocumento(), dto.tipoPessoa())) {
-            throw new IllegalArgumentException("Documento já cadastrado para esse tipo de pessoa.");
+            if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoaAndCodigoNot(dto.numeroDocumento(), dto.tipoPessoa(), codigoIgnorar)) {
+                throw new BoletimImobiliarioException("Documento já cadastrado para esse tipo de pessoa.");
+            }
+
+            if (responsavelLegalRepository.existsByNomeIgnoreCaseAndAtivoTrueAndCodigoNot(dto.nome(), codigoIgnorar)) {
+                throw new BoletimImobiliarioException("Nome de Responsável já cadastrado.");
+            }
         }
     }
 
 
     public ResponsavelLegal criarResponsavelLegal(ResponsavelLegalDTO dto) {
-
-        validarUnicidade(dto);
 
         ResponsavelLegal responsavel = new ResponsavelLegal();
         responsavel.setTipoPessoa(dto.tipoPessoa());
@@ -147,5 +166,4 @@ public class BoletimImobiliarioService {
 
         return responsavelLegalRepository.save(responsavel);
     }
-
 }

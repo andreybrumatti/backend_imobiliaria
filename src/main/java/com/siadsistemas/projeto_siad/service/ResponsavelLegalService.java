@@ -1,6 +1,8 @@
 package com.siadsistemas.projeto_siad.service;
 
 import com.siadsistemas.projeto_siad.dto.ResponsavelLegalDTO;
+import com.siadsistemas.projeto_siad.exception.domain.responsavelLegal.ResponsavelLegalException;
+import com.siadsistemas.projeto_siad.exception.domain.responsavelLegal.ResponsavelLegalNotFoundException;
 import com.siadsistemas.projeto_siad.model.Bairro;
 import com.siadsistemas.projeto_siad.model.Endereco;
 import com.siadsistemas.projeto_siad.model.Logradouro;
@@ -27,7 +29,7 @@ public class ResponsavelLegalService {
     private final BairroService bairroService;
 
     public List<ResponsavelLegal> findAll() {
-        return responsavelLegalRepository.findAllByAtivoTrue();
+        return responsavelLegalRepository.findAllByAtivoTrueOrderByCodigoAsc();
     }
 
     @Transactional
@@ -57,7 +59,7 @@ public class ResponsavelLegalService {
     @Transactional
     public ResponsavelLegal update(UUID id, ResponsavelLegalDTO dto) {
         ResponsavelLegal existente = responsavelLegalRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Responsável legal não encontrado com id: " + id));
+                .orElseThrow(() -> new ResponsavelLegalNotFoundException("Responsável legal não encontrado com id: " + id));
 
         validarCampos(dto);
         validarUnicidade(dto);
@@ -80,7 +82,7 @@ public class ResponsavelLegalService {
     @Transactional
     public void inativarPorId(UUID id) {
         ResponsavelLegal existente = responsavelLegalRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Responsável legal não encontrado com id: " + id));
+                .orElseThrow(() -> new ResponsavelLegalNotFoundException("Responsável legal não encontrado com id: " + id));
 
         existente.setAtivo(false);
         existente.setUpdated_at(LocalDateTime.now());
@@ -89,26 +91,26 @@ public class ResponsavelLegalService {
 
     private void validarCampos(ResponsavelLegalDTO dto) {
         if (dto.tipoPessoa() == null) {
-            throw new IllegalArgumentException("Tipo de pessoa é obrigatório.");
+            throw new ResponsavelLegalException("Tipo de pessoa é obrigatório.");
         }
         if (dto.nome() == null || dto.nome().isBlank()) {
-            throw new IllegalArgumentException("Nome é obrigatório.");
+            throw new ResponsavelLegalException("Nome é obrigatório.");
         }
         if (dto.numeroDocumento() == null || dto.numeroDocumento().isBlank()) {
-            throw new IllegalArgumentException("Número do documento é obrigatório.");
+            throw new ResponsavelLegalException("Número do documento é obrigatório.");
         }
         if (dto.email() == null || dto.email().isBlank()) {
-            throw new IllegalArgumentException("E-mail é obrigatório.");
+            throw new ResponsavelLegalException("E-mail é obrigatório.");
         }
     }
 
     public void validarUnicidade(ResponsavelLegalDTO dto) {
         if (responsavelLegalRepository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("E-mail já cadastrado.");
+            throw new ResponsavelLegalException("E-mail já cadastrado.");
         }
 
         if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoa(dto.numeroDocumento(), dto.tipoPessoa())) {
-            throw new IllegalArgumentException("Documento já cadastrado para esse tipo de pessoa.");
+            throw new ResponsavelLegalException("Documento já cadastrado para esse tipo de pessoa.");
         }
     }
 
