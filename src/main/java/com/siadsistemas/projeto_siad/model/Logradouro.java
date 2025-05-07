@@ -31,4 +31,15 @@ public class Logradouro {
     private boolean ativo;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
+
+    @PrePersist
+    public void prePersist() {
+        this.created_at = LocalDateTime.now();
+        this.ativo = true;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updated_at = LocalDateTime.now();
+    }
 }

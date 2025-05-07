@@ -7,7 +7,6 @@ import com.siadsistemas.projeto_siad.exception.domain.boletimImobiliario.Boletim
 import com.siadsistemas.projeto_siad.model.*;
 import com.siadsistemas.projeto_siad.repository.BoletimImobiliarioRepository;
 import com.siadsistemas.projeto_siad.repository.ResponsavelLegalRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,10 +50,6 @@ public class BoletimImobiliarioService {
         bci.setEnderecoFisico(enderecoFisico);
         bci.setEnderecoCorrespondencia(enderecoCorrespondencia);
 
-        bci.setAtivo(true);
-        bci.setCreated_at(LocalDateTime.now());
-        bci.setUpdated_at(LocalDateTime.now());
-
         return boletimRepository.save(bci);
     }
 
@@ -82,11 +77,9 @@ public class BoletimImobiliarioService {
 
         Endereco enderecoResponsavel = responsavelLegalService.buscarOuCriarEnderecoCompleto(dto.responsavelLegal().endereco());
         responsavel.setEndereco(enderecoResponsavel);
-        responsavel.setUpdated_at(LocalDateTime.now());
 
         existente.setEnderecoFisico(enderecoFisico);
         existente.setEnderecoCorrespondencia(enderecoCorrespondencia);
-        existente.setUpdated_at(LocalDateTime.now());
 
         return boletimRepository.save(existente);
     }
@@ -97,7 +90,6 @@ public class BoletimImobiliarioService {
                 .orElseThrow(() -> new BoletimImobiliarioNotFoundException("Boletim não encontrado com id: " + id));
 
         existente.setAtivo(false);
-        existente.setUpdated_at(LocalDateTime.now());
 
         boletimRepository.save(existente);
     }
@@ -159,10 +151,7 @@ public class BoletimImobiliarioService {
         Endereco endereco = responsavelLegalService.buscarOuCriarEnderecoCompleto(dto.endereco());
         responsavel.setEndereco(endereco);
 
-        responsavel.setAtivo(true);
         responsavel.setCodigo(responsavelLegalRepository.findMaxCodigo() + 1);
-        responsavel.setCreated_at(LocalDateTime.now());
-        responsavel.setUpdated_at(LocalDateTime.now());
 
         return responsavelLegalRepository.save(responsavel);
     }

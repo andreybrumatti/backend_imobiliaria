@@ -13,18 +13,18 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/boletim-imobiliario")
+@RequestMapping("/api/boletimImobiliario")
 @AllArgsConstructor
 public class BoletimImobiliarioController {
 
     private final BoletimImobiliarioService boletimService;
 
-    @GetMapping
+    @GetMapping("/listarTodos")
     public ResponseEntity<List<BoletimImobiliario>> getAll() {
         return ResponseEntity.ok(boletimService.findAll());
     }
 
-    @PostMapping
+    @PostMapping("/cadastrar")
     public ResponseEntity<?> create(@RequestBody BoletimImobiliarioDTO dto) {
         try {
             BoletimImobiliario novo = boletimService.create(dto);

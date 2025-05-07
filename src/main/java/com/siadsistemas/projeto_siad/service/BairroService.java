@@ -2,12 +2,8 @@ package com.siadsistemas.projeto_siad.service;
 
 import com.siadsistemas.projeto_siad.model.Bairro;
 import com.siadsistemas.projeto_siad.repository.BairroRepository;
-import com.siadsistemas.projeto_siad.repository.CidadeRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -15,31 +11,26 @@ import java.util.Optional;
 public class BairroService {
 
     private final BairroRepository bairroRepository;
-    private final CidadeRepository cidadeRepository;
+    private final CidadeService cidadeService;
 
-    public Bairro buscarOuCriar(String nome, Integer cidade_codigo) {
+    public Bairro buscarOuCriar(String nomeBairro, Integer cidade_codigo) {
 
-        Optional<Bairro> existente = bairroRepository.findByNomeAndAtivoTrueIgnoreCase(nome);
+        Optional<Bairro> existente = bairroRepository.findByNomeAndAtivoTrueIgnoreCase(nomeBairro);
 
         if(existente.isPresent()) {
             Bairro existenteEditado = existente.get();
 
-            existenteEditado.setNome(nome);
-            existenteEditado.setCidade(cidadeRepository.findByCodigo(cidade_codigo)
-                    .orElseThrow(() -> new EntityNotFoundException("Cidade não encontrada com código: " + cidade_codigo)));
-            existenteEditado.setUpdated_at(LocalDateTime.now());
+            existenteEditado.setNome(nomeBairro);
+            existenteEditado.setCidade(cidadeService.findByCodigo(cidade_codigo));
             return bairroRepository.save(existenteEditado);
         }
 
         Bairro bairro = new Bairro();
-        bairro.setNome(nome);
-        bairro.setCidade(cidadeRepository.findByCodigo(cidade_codigo)
-                .orElseThrow(() -> new EntityNotFoundException("Cidade não encontrada com código: " + cidade_codigo)));
-        bairro.setAtivo(true);
-        bairro.setCreated_at(LocalDateTime.now());
-        bairro.setUpdated_at(LocalDateTime.now());
+        bairro.setNome(nomeBairro);
+        bairro.setCidade(cidadeService.findByCodigo(cidade_codigo));
         Integer novoCodigo = bairroRepository.findMaxCodigo() + 1;
         bairro.setCodigo(novoCodigo);
+
         return bairroRepository.save(bairro);
     }
 }

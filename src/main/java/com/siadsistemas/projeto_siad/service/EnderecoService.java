@@ -43,9 +43,6 @@ public class EnderecoService {
         endereco.setNumero(dto.endereco().getNumero());
         endereco.setComplemento(dto.endereco().getComplemento());
         endereco.setCep(dto.endereco().getCep());
-        endereco.setAtivo(true);
-        endereco.setCreated_at(LocalDateTime.now());
-        endereco.setUpdated_at(LocalDateTime.now());
 
         return enderecoRepository.save(endereco);
     }
@@ -66,7 +63,6 @@ public class EnderecoService {
         existente.setNumero(dto.endereco().getNumero());
         existente.setComplemento(dto.endereco().getComplemento());
         existente.setCep(dto.endereco().getCep());
-        existente.setUpdated_at(LocalDateTime.now());
 
         return enderecoRepository.save(existente);
     }
@@ -77,7 +73,7 @@ public class EnderecoService {
                 .orElseThrow(() -> new EnderecoNotFoundException("Endereço não encontrado com ID: " + id));
 
         existente.setAtivo(false);
-        existente.setUpdated_at(LocalDateTime.now());
+
         enderecoRepository.save(existente);
     }
 

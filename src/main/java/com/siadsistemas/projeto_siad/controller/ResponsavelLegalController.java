@@ -13,18 +13,18 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/responsavel-legal")
+@RequestMapping("/api/responsavelLegal")
 @AllArgsConstructor
 public class ResponsavelLegalController {
 
     private final ResponsavelLegalService responsavelLegalService;
 
-    @GetMapping
+    @GetMapping("/listarTodos")
     public ResponseEntity<List<ResponsavelLegal>> getAll() {
         return ResponseEntity.ok(responsavelLegalService.findAll());
     }
 
-    @PostMapping
+    @PostMapping("/cadastrar")
     public ResponseEntity<?> create(@RequestBody ResponsavelLegalDTO dto) {
         try {
             ResponsavelLegal novo = responsavelLegalService.create(dto);

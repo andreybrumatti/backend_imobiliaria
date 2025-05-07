@@ -13,18 +13,18 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/enderecos")
+@RequestMapping("/api/endereco")
 @AllArgsConstructor
 public class EnderecoController {
 
     private final EnderecoService enderecoService;
 
-    @GetMapping
+    @GetMapping("/listarTodos")
     public ResponseEntity<List<Endereco>> getAll() {
         return ResponseEntity.ok(enderecoService.findAll());
     }
 
-    @PostMapping
+    @PostMapping("/cadastrar")
     public ResponseEntity<?> create(@RequestBody EnderecoDTO dto) {
         try {
             Endereco novo = enderecoService.create(dto);

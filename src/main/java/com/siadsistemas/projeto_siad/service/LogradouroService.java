@@ -46,11 +46,6 @@ public class LogradouroService {
 
         logradouro.setTipo_logradouro(buscarTipoLogradouro(dto.tipo_logradouro()));
 
-
-        logradouro.setAtivo(true);
-        logradouro.setCreated_at(LocalDateTime.now());
-        logradouro.setUpdated_at(LocalDateTime.now());
-
         Integer novoCodigo = logradouroRepository.findMaxCodigo() + 1;
         logradouro.setCodigo(novoCodigo);
 
@@ -80,9 +75,6 @@ public class LogradouroService {
 
         novoLogradouro.setTipo_logradouro(buscarTipoLogradouro(tipoLogradouro));
 
-        novoLogradouro.setAtivo(true);
-        novoLogradouro.setCreated_at(LocalDateTime.now());
-        novoLogradouro.setUpdated_at(LocalDateTime.now());
         Integer novoCodigo = logradouroRepository.findMaxCodigo() + 1;
         novoLogradouro.setCodigo(novoCodigo);
 
@@ -104,7 +96,6 @@ public class LogradouroService {
         }
 
         existente.setTipo_logradouro(buscarTipoLogradouro(dto.tipo_logradouro()));
-        existente.setUpdated_at(LocalDateTime.now());
 
         return logradouroRepository.save(existente);
     }
@@ -115,7 +106,6 @@ public class LogradouroService {
                 .orElseThrow(() -> new LogradouroNotFoundException("Logradouro ativo não encontrado com código: " + id));
 
         existente.setAtivo(false);
-        existente.setUpdated_at(LocalDateTime.now());
 
         logradouroRepository.save(existente);
     }

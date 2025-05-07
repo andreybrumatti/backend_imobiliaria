@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tipo-logradouro")
+@RequestMapping("/api/tipo-logradouro")
 @AllArgsConstructor
 public class TipoLogradouroController {
 
     private final TipoLogradouroService tipoLogradouroService;
 
-    @GetMapping
+    @GetMapping("/listarTodos")
     public List<TipoLogradouro> listarTodos() {
         return tipoLogradouroService.listarTodos();
     }

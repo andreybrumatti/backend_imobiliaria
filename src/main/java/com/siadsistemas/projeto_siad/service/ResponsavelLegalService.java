@@ -1,6 +1,7 @@
 package com.siadsistemas.projeto_siad.service;
 
 import com.siadsistemas.projeto_siad.dto.ResponsavelLegalDTO;
+import com.siadsistemas.projeto_siad.exception.domain.boletimImobiliario.BoletimImobiliarioException;
 import com.siadsistemas.projeto_siad.exception.domain.responsavelLegal.ResponsavelLegalException;
 import com.siadsistemas.projeto_siad.exception.domain.responsavelLegal.ResponsavelLegalNotFoundException;
 import com.siadsistemas.projeto_siad.model.Bairro;
@@ -9,12 +10,10 @@ import com.siadsistemas.projeto_siad.model.Logradouro;
 import com.siadsistemas.projeto_siad.model.ResponsavelLegal;
 import com.siadsistemas.projeto_siad.repository.EnderecoRepository;
 import com.siadsistemas.projeto_siad.repository.ResponsavelLegalRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,7 +34,7 @@ public class ResponsavelLegalService {
     @Transactional
     public ResponsavelLegal create(ResponsavelLegalDTO dto) {
         validarCampos(dto);
-        validarUnicidade(dto);
+        validarUnicidade(dto, null);
 
         ResponsavelLegal responsavel = new ResponsavelLegal();
         responsavel.setCodigo(responsavelLegalRepository.findMaxCodigo() + 1);
@@ -49,10 +48,6 @@ public class ResponsavelLegalService {
         Endereco endereco = buscarOuCriarEnderecoCompleto(dto.endereco());
         responsavel.setEndereco(endereco);
 
-        responsavel.setAtivo(true);
-        responsavel.setCreated_at(LocalDateTime.now());
-        responsavel.setUpdated_at(LocalDateTime.now());
-
         return responsavelLegalRepository.save(responsavel);
     }
 
@@ -62,7 +57,7 @@ public class ResponsavelLegalService {
                 .orElseThrow(() -> new ResponsavelLegalNotFoundException("Responsável legal não encontrado com id: " + id));
 
         validarCampos(dto);
-        validarUnicidade(dto);
+        validarUnicidade(dto, existente.getCodigo());
 
         existente.setTipoPessoa(dto.tipoPessoa());
         existente.setNome(dto.nome());
@@ -74,8 +69,6 @@ public class ResponsavelLegalService {
         Endereco endereco = buscarOuCriarEnderecoCompleto(dto.endereco());
         existente.setEndereco(endereco);
 
-        existente.setUpdated_at(LocalDateTime.now());
-
         return responsavelLegalRepository.save(existente);
     }
 
@@ -85,7 +78,7 @@ public class ResponsavelLegalService {
                 .orElseThrow(() -> new ResponsavelLegalNotFoundException("Responsável legal não encontrado com id: " + id));
 
         existente.setAtivo(false);
-        existente.setUpdated_at(LocalDateTime.now());
+
         responsavelLegalRepository.save(existente);
     }
 
@@ -104,13 +97,31 @@ public class ResponsavelLegalService {
         }
     }
 
-    public void validarUnicidade(ResponsavelLegalDTO dto) {
-        if (responsavelLegalRepository.existsByEmail(dto.email())) {
-            throw new ResponsavelLegalException("E-mail já cadastrado.");
-        }
+    public void validarUnicidade(ResponsavelLegalDTO dto, Integer codigoIgnorar) {
+        if (codigoIgnorar == null) {
+            if (responsavelLegalRepository.existsByEmail(dto.email())) {
+                throw new ResponsavelLegalException("E-mail já cadastrado.");
+            }
 
-        if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoa(dto.numeroDocumento(), dto.tipoPessoa())) {
-            throw new ResponsavelLegalException("Documento já cadastrado para esse tipo de pessoa.");
+            if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoa(dto.numeroDocumento(), dto.tipoPessoa())) {
+                throw new ResponsavelLegalException("Documento já cadastrado para esse tipo de pessoa.");
+            }
+
+            if (responsavelLegalRepository.existsByNomeIgnoreCaseAndAtivoTrue(dto.nome())) {
+                throw new ResponsavelLegalException("Nome de Responsável já cadastrado.");
+            }
+        } else {
+            if (responsavelLegalRepository.existsByEmailAndCodigoNot(dto.email(), codigoIgnorar)) {
+                throw new ResponsavelLegalException("E-mail já cadastrado.");
+            }
+
+            if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoaAndCodigoNot(dto.numeroDocumento(), dto.tipoPessoa(), codigoIgnorar)) {
+                throw new ResponsavelLegalException("Documento já cadastrado para esse tipo de pessoa.");
+            }
+
+            if (responsavelLegalRepository.existsByNomeIgnoreCaseAndAtivoTrueAndCodigoNot(dto.nome(), codigoIgnorar)) {
+                throw new ResponsavelLegalException("Nome de Responsável já cadastrado.");
+            }
         }
     }
 
@@ -145,10 +156,7 @@ public class ResponsavelLegalService {
         novoEndereco.setNumero(enderecoDTO.getNumero());
         novoEndereco.setComplemento(enderecoDTO.getComplemento());
         novoEndereco.setCep(enderecoDTO.getCep());
-        novoEndereco.setAtivo(true);
         novoEndereco.setCodigo(enderecoRepository.findMaxCodigo() + 1);
-        novoEndereco.setCreated_at(LocalDateTime.now());
-        novoEndereco.setUpdated_at(LocalDateTime.now());
 
         return enderecoRepository.save(novoEndereco);
     }

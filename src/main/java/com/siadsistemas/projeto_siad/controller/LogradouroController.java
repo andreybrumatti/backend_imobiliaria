@@ -13,18 +13,18 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/logradouro")
+@RequestMapping("/api/logradouro")
 @AllArgsConstructor
 public class LogradouroController {
 
     private final LogradouroService logradouroService;
 
-    @GetMapping
+    @GetMapping("/listarTodos")
     public ResponseEntity<List<Logradouro>> getAll() {
         return ResponseEntity.ok(logradouroService.findAll());
     }
 
-    @PostMapping
+    @PostMapping("/cadastrar")
     public ResponseEntity<?> create(@RequestBody LogradouroDTO dto) {
         try {
             Logradouro novo = logradouroService.create(dto);
