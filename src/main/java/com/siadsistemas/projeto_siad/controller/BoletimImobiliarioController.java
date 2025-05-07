@@ -3,6 +3,7 @@ package com.siadsistemas.projeto_siad.controller;
 import com.siadsistemas.projeto_siad.dto.BoletimImobiliarioDTO;
 import com.siadsistemas.projeto_siad.model.BoletimImobiliario;
 import com.siadsistemas.projeto_siad.service.BoletimImobiliarioService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,11 +20,13 @@ public class BoletimImobiliarioController {
 
     private final BoletimImobiliarioService boletimService;
 
+    @Operation(summary = "Listar todos os boletins imobiliários")
     @GetMapping("/listarTodos")
     public ResponseEntity<List<BoletimImobiliario>> getAll() {
         return ResponseEntity.ok(boletimService.findAll());
     }
 
+    @Operation(summary = "Cadastrar novo boletim imobiliário")
     @PostMapping("/cadastrar")
     public ResponseEntity<?> create(@RequestBody BoletimImobiliarioDTO dto) {
         try {
@@ -34,6 +37,7 @@ public class BoletimImobiliarioController {
         }
     }
 
+    @Operation(summary = "Atualizar os dados do boletim imobiliário")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody BoletimImobiliarioDTO dto) {
         try {
@@ -44,6 +48,7 @@ public class BoletimImobiliarioController {
         }
     }
 
+    @Operation(summary = "Inativar boletim imobiliário")
     @PutMapping("/inativar/{id}")
     public ResponseEntity<?> inativarPorId(@PathVariable UUID id) {
         try {

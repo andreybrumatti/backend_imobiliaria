@@ -3,6 +3,7 @@ package com.siadsistemas.projeto_siad.controller;
 import com.siadsistemas.projeto_siad.dto.EnderecoDTO;
 import com.siadsistemas.projeto_siad.model.Endereco;
 import com.siadsistemas.projeto_siad.service.EnderecoService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,11 +20,13 @@ public class EnderecoController {
 
     private final EnderecoService enderecoService;
 
+    @Operation(summary = "Listar todos os endereços")
     @GetMapping("/listarTodos")
     public ResponseEntity<List<Endereco>> getAll() {
         return ResponseEntity.ok(enderecoService.findAll());
     }
 
+    @Operation(summary = "Cadastrar um novo endereço")
     @PostMapping("/cadastrar")
     public ResponseEntity<?> create(@RequestBody EnderecoDTO dto) {
         try {
@@ -34,6 +37,7 @@ public class EnderecoController {
         }
     }
 
+    @Operation(summary = "Atualizar os dados do endereço")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody EnderecoDTO dto) {
         try {
@@ -45,6 +49,7 @@ public class EnderecoController {
         }
     }
 
+    @Operation(summary = "Inativar endereço")
     @PutMapping("/inativar/{id}")
     public ResponseEntity<?> inativarPorId(@PathVariable UUID id) {
         try {

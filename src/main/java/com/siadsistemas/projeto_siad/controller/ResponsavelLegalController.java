@@ -3,6 +3,7 @@ package com.siadsistemas.projeto_siad.controller;
 import com.siadsistemas.projeto_siad.dto.ResponsavelLegalDTO;
 import com.siadsistemas.projeto_siad.model.ResponsavelLegal;
 import com.siadsistemas.projeto_siad.service.ResponsavelLegalService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,11 +20,13 @@ public class ResponsavelLegalController {
 
     private final ResponsavelLegalService responsavelLegalService;
 
+    @Operation(summary = "Listar todos os Responsáveis Legais")
     @GetMapping("/listarTodos")
     public ResponseEntity<List<ResponsavelLegal>> getAll() {
         return ResponseEntity.ok(responsavelLegalService.findAll());
     }
 
+    @Operation(summary = "Cadastrar novo Responsável Legal")
     @PostMapping("/cadastrar")
     public ResponseEntity<?> create(@RequestBody ResponsavelLegalDTO dto) {
         try {
@@ -34,6 +37,7 @@ public class ResponsavelLegalController {
         }
     }
 
+    @Operation(summary = "Atualizar os dados do Responsável Legal")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody ResponsavelLegalDTO dto) {
         try {
@@ -44,6 +48,7 @@ public class ResponsavelLegalController {
         }
     }
 
+    @Operation(summary = "Inativar Responsável Legal")
     @PutMapping("/inativar/{id}")
     public ResponseEntity<?> inativarPorId(@PathVariable UUID id) {
         try {

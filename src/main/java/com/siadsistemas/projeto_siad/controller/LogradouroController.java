@@ -3,6 +3,7 @@ package com.siadsistemas.projeto_siad.controller;
 import com.siadsistemas.projeto_siad.dto.LogradouroDTO;
 import com.siadsistemas.projeto_siad.model.Logradouro;
 import com.siadsistemas.projeto_siad.service.LogradouroService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,11 +20,13 @@ public class LogradouroController {
 
     private final LogradouroService logradouroService;
 
+    @Operation(summary = "Listar todos os logradouros")
     @GetMapping("/listarTodos")
     public ResponseEntity<List<Logradouro>> getAll() {
         return ResponseEntity.ok(logradouroService.findAll());
     }
 
+    @Operation(summary = "Cadastrar novo logradouro")
     @PostMapping("/cadastrar")
     public ResponseEntity<?> create(@RequestBody LogradouroDTO dto) {
         try {
@@ -34,6 +37,7 @@ public class LogradouroController {
         }
     }
 
+    @Operation(summary = "Atualizar os dados do logradouro")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody LogradouroDTO dto) {
         try {
@@ -44,6 +48,7 @@ public class LogradouroController {
         }
     }
 
+    @Operation(summary = "Inativar logradouro")
     @PutMapping("/inativar/{id}")
     public ResponseEntity<?> inativarPorId(@PathVariable UUID id) {
         try {
