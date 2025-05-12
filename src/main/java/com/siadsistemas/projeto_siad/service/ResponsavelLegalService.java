@@ -115,7 +115,7 @@ public class ResponsavelLegalService {
                 throw new ResponsavelLegalException("E-mail já cadastrado.");
             }
 
-            if (responsavelLegalRepository.existsByNumeroDocumentoAndTipoPessoaAndCodigoNot(dto.numeroDocumento(), dto.tipoPessoa(), codigoIgnorar)) {
+            if (responsavelLegalRepository.existsByNumeroDocumentoAndCodigoNot(dto.numeroDocumento(), codigoIgnorar)) {
                 throw new ResponsavelLegalException("Documento já cadastrado para esse tipo de pessoa.");
             }
 

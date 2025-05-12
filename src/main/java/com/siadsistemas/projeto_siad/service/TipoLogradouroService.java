@@ -14,6 +14,6 @@ public class TipoLogradouroService {
     private final TipoLogradouroRepository tipoLogradouroRepository;
 
     public List<TipoLogradouro> listarTodos() {
-        return tipoLogradouroRepository.findAllByAtivoTrue();
+        return tipoLogradouroRepository.findAllByAtivoTrueOrderByCodigoAsc();
     }
 }

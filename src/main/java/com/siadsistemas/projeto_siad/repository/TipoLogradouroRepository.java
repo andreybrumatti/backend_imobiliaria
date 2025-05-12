@@ -18,5 +18,5 @@ public interface TipoLogradouroRepository extends JpaRepository<TipoLogradouro, 
     @Query("SELECT COALESCE(MAX(e.codigo), 0) FROM TipoLogradouro e")
     Integer findMaxCodigo();
 
-    List<TipoLogradouro> findAllByAtivoTrue();
+    List<TipoLogradouro> findAllByAtivoTrueOrderByCodigoAsc();
 }
