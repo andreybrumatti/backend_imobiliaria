@@ -1,5 +1,6 @@
 package com.siadsistemas.projeto_siad.model;
 
+import com.siadsistemas.projeto_siad.auditing.Auditable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BoletimImobiliario {
+public class BoletimImobiliario extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
