@@ -39,7 +39,7 @@ public class SecurityFilter extends OncePerRequestFilter { //Essa classe é resp
             UserDetails user = usersRepository.findByLogin(login);
 
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()); //Criando a autenticação do usuário
-            SecurityContextHolder.getContext().setAuthentication(authentication);//salvando a autenticação no contexto de segurança do Spring
+            SecurityContextHolder.getContext().setAuthentication(authentication);//salvando autenticação no contexto de segurança do Spring
         }
 
         filterChain.doFilter(request, response); //Se o token for nulo, continua a execução da requisição normalmente

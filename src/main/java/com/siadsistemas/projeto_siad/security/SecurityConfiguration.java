@@ -19,7 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity //Essa anotação habilita a configuração de segurança do Spring Security
 @AllArgsConstructor
 public class SecurityConfiguration {
 

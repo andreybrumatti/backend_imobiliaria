@@ -23,7 +23,7 @@ public class AuthenticationService {
         String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
 
         Users newUser = new Users();
-        newUser.setCodigo(2);
+        newUser.setCodigo(6);
         newUser.setLogin(dto.login());
         newUser.setPassword(encryptedPassword);
         newUser.setRole(dto.role());
